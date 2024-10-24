@@ -18,11 +18,11 @@ function end() {
 
 window.onload = function () {
   init();
-}
+};
 
 window.onunload = function () {
   end();
-}
+};
 
 var onCompleted = function (result) {
   var masteryScore;
@@ -35,36 +35,36 @@ var onCompleted = function (result) {
   scorm.set("cmi.core.score.raw", result.score.scaled * 100);
   scorm.set("cmi.core.score.min", "0");
   scorm.set("cmi.core.score.max", "100");
-  scorm.set("cmi.core.score.scaled", result.score.scaled * 100);
+  if (scorm.version == "2004") {
+    scorm.set("cmi.core.score.scaled", result.score.scaled);
+  }
 
   if (masteryScore === undefined) {
     scorm.status("set", "completed");
-  }
-  else {
+  } else {
     var passed = result.score.scaled >= masteryScore;
     if (scorm.version == "2004") {
-      scorm.status("set", "completed");
+      scorm.status("set", "passed");
       if (passed) {
         scorm.set("cmi.success_status", "passed");
-      }
-      else {
+      } else {
         scorm.set("cmi.success_status", "failed");
       }
-    }
-    else if (scorm.version == "1.2") {
+    } else if (scorm.version == "1.2") {
       if (passed) {
-        scorm.status("set", "passed")
-      }
-      else {
-        scorm.status("set", "failed")
+        scorm.status("set", "passed");
+      } else {
+        scorm.status("set", "failed");
       }
     }
   }
-}
+  scorm.data.save();
+};
 
-H5P.externalDispatcher.on('xAPI', function (event) {
-  console.log('xAPI event: ' + JSON.stringify(event));
+H5P.externalDispatcher.on("xAPI", function (event) {
+  console.log("xAPI event: " + JSON.stringify(event));
   if (event.data.statement.result) {
     onCompleted(event.data.statement.result);
   }
 });
+
